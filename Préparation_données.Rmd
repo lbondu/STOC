@@ -1,0 +1,145 @@
+---
+title: "données STOC Bretagne"
+author: "Françoise Amélineau"
+date: "2025-01-29"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+# ici mettre les packages à charger 
+knitr::opts_chunk$set(echo = TRUE,
+                      results = 'show',
+                      message = FALSE,
+                      warning = FALSE )
+
+library(dplyr) # permet d'utiliser %>%, filter, summarize et bien d'autres.
+library(sf) # pour manipuler des objets spatiaux
+library(ggplot2)  # pour les graphiques
+
+```
+
+## Préparation du jeu de données
+
+Le jeu de données téléchargé contient les observations de toute la France et de toutes les espèces. 
+Nous allons travailler sur 4 espèces: le bruant jaune, l'alouette des champs, la tourterelle des bois et la mésange charbonnière. Nous allons créer une table par espèce. 
+Nous allons travailler sur la Bretagne uniquement. L'étape suivante consiste à sélectionner uniquement les données provenant de la région à partir d'une sélection spatiale. 
+
+## Etape 1: création des jeux de données par espèce 
+
+
+```{r espece}
+# étape 1: création d'une table par espèce (avec les données de toute la France)
+#importer les données STOC
+mydat = read.csv2("data/0041794-241126133413365.csv", sep = '\t') # note pour Océane: pense à mettre le fichier de données dans le dossier STOC_Bret/data !
+
+
+#stocker dans une variable les données concernant uniquement les espèces spécialistes : alouette des champs et bruant jaune
+alouette = mydat %>%  filter(species == "Alauda arvensis")
+bruantj = mydat %>% filter(species == "Emberiza citrinella")
+
+#idem pour les espèces généralistes tourterelle des bois et mésange charbonnière
+tourt = mydat %>% filter(species == "Streptopelia turtur")
+charbo = mydat %>% filter(species == "Parus major")
+
+print(nrow(mydat))
+print(nrow(alouette))
+print(nrow(bruantj))
+
+rm(mydat)
+
+```
+
+## Etape 2: sélection des données en Bretagne uniquement 
+
+
+```{r préparation données spatiales, echo=FALSE}
+
+# charger les contours des départements 
+dep35 <- st_read("data/departement-35/admin-departement.shp")
+dep22 <- st_read("data/departement-22/admin-departement.shp")
+dep56 <- st_read("data/departement-56/admin-departement.shp")
+dep29 <- st_read("data/departement-29/admin-departement.shp")
+
+#rassembler les polygones deux à deux pour obtenir un seul polygone
+dep35_22 = st_union(dep35,dep22)
+
+dep56_29 = st_union(dep56,dep29)
+
+#rassembler les deux polygones qui en résultent pour obtenir la Bretagne
+Bret = st_union(dep35_22,dep56_29)
+plot(st_geometry(Bret))
+
+
+#conversion en spatial
+bruantj = st_as_sf(bruantj,coords = c("decimalLongitude","decimalLatitude"), crs = 4326)
+tourt = st_as_sf(tourt,coords = c("decimalLongitude","decimalLatitude"), crs = 4326)
+charbo = st_as_sf(charbo,coords = c("decimalLongitude","decimalLatitude"), crs = 4326)
+alouette = st_as_sf(alouette,coords = c("decimalLongitude","decimalLatitude"), crs = 4326)
+
+# sélection des données en Bretagne
+
+# pour l'alouette
+alouette.bret = st_intersection(alouette,Bret)
+
+#pour le bruant
+bruantj.bret = st_intersection(bruantj,Bret)
+
+#pour la mésange
+charbo.bret = st_intersection(charbo,Bret)
+
+
+#pour la tourterelle des bois
+tourt.bret = st_intersection(tourt,Bret)
+
+
+```
+
+
+## Etape 3: cartes pour visualiser les données
+
+
+Voici à quoi ressemblent les données sur une carte. il faut d'abord indiquer à R que ce sont des données spatiales, et charger les contours des départements bretons 
+
+
+# carte des observations d'alouettes en France et en Bretagne
+
+```{r alouette France}
+alouette = st_as_sf(alouette,coords = c("decimalLongitude","decimalLatitude"), crs = 4326)
+#le crs est est le "Coordinate Reference System", ici WGS84, système géodésique mondial
+plot(st_geometry(alouette)) #représente toutes les observations de l'alouette en France, selon leurs coordonnées (st_geometry pour ne représenter les points qu'une fois, selon la colonne geometry uniquement)
+
+
+#représenter les observations d'alouettes en Bretagne
+ggplot() + 
+  geom_sf(data = dep35) + #trace le contour du département 35
+  geom_sf(data = dep29) + #trace le contour du département 35
+  geom_sf(data = dep56) + #trace le contour du département 35
+  geom_sf(data = dep22) + #trace le contour du département 35
+  geom_sf(data = alouette) + #ajoute les données d'observation d'alouettes
+  coord_sf(xlim = c(-6,0), ylim = c(46,49.5), expand = FALSE) #restreint ce qu'on voit de ces données à une zone en Bretagne (grâce aux degrés N et W)
+
+```
+
+
+# carte interactive
+
+```{r carte interactive}
+
+#nécessite un nouveau package
+library(tmap)
+
+#définir le mode interactif
+tmap_mode("view")
+
+tm_shape(charbo.bret) + 
+  tm_dots(col = "grey", size = 0.1)+
+  tm_shape(bruantj.bret) + 
+  tm_dots(col = "yellow", size = 0.1)+ #trace le spoints, size définit leur taille
+  tm_shape(alouette.bret) + 
+  tm_dots(col = "brown", size = 0.1)+
+  tm_layout(title = "Observations des espèces (STOC-EPS) en Bretagne",
+            legend.show = TRUE,
+            legend.outside = TRUE)
+
+
+```
