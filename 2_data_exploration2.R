@@ -760,6 +760,7 @@ ggplot(ratio.tablAlNat, aes(x = year)) +
 
 
 
+
 # tourterelle nationale en pause car trop bizzarre : croissance ???---------------------------------------------------
 
 sum.tourtNatio = tourt %>% 

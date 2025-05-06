@@ -60,7 +60,7 @@ ggplot() +
   theme_minimal() + #juste pour l'esthétique
   ggtitle("Observations (STOC-eps) d'alouettes des champs en Bretagne") #ajout d'un titre
 
-
+alouette.bretGeom
 
 # Pour le fun : créer une carte interactive -------------------------------
 

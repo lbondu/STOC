@@ -37,7 +37,7 @@ dep35 <- st_read("data/departement-35/admin-departement.shp")
 
 #convertir les donées STOC qui contiennent déjà des colonnes Longitude et Latitude
 #en objet spatial aussi (les données Lon Lat sont reconnues grâce au système de coordonnées)
-alouette = st_as_sf(alouette,coords = c("decimalLongitude","decimalLatitude"), crs = 4326)
+alouette2 = st_as_sf(alouette,coords = c("decimalLongitude","decimalLatitude"), crs = 4326)
 #le crs est est le "Coordinate Reference System", ici WGS84, système géodésique mondial
 plot(st_geometry(alouette)) #représente toutes les observations de l'alouette en France, selon leurs coordonnées (st_geometry pour ne représenter les points qu'une fois, selon la colonne geometry uniquement)
 
