@@ -518,7 +518,7 @@ legend_text <- paste0("y = ", a, " + ", b, "x\n",
 ggplot(ratio.alouettenbobse, aes(x = year)) +
   geom_smooth(aes(y = ratio2_norm), method = lm, fill = 'red', color = 'red') +
   labs(x = "Années", y = "Abondance relative",
-       title = "Abondance relative de l'Alouette des champs au cours des années",
+       title = "Abondance relative de l'Alouette des champsau cours des années",
        caption = "PIR Science Participative", subtitle = "Alauda arvensis") +
   theme_classic() +
   geom_point(aes(y = ratio2_norm), colour = 'red', size = 1) +
@@ -700,4 +700,121 @@ ggplot(ratio.BJobsparotot, aes(x = year)) +
   annotate("text", x = max(ratio.BJobsparotot$year) - 0,  # Déplacement à droite
            y = max(ratio.BJobsparotot$ratio2_norm) * 0.9,  # Déplacement vers le haut
            label = legend_text, hjust = 1, size = 3.5, color = "black")
+
+
+
+# alouette nationale en pause car trop bizzarre : croissance ??? ------------------------------------------------------
+sum.alouetteNat = alouette %>% 
+  st_drop_geometry() %>% #retire la partie spatial epour faciliter le traitement des données numériques
+  group_by(year) %>%  #groupe par année (première colone = année)
+  summarize(n.observationsAlNat = n(), n.observateurs = n_distinct(recordedBy) ) %>% #crée deux nouvelles colonnes
+  #nombre d'observations = nombre de ligne alouette par an
+  #nombre d'observateurs = nombre de noms différents ayant fait ces observations d'alouettes par an
+  mutate(ratio1 = n.observationsAlNat/n.observateurs) #nouvelle colonne qui résume le ratio des deux
+ratio.tablAlNat = left_join(sum.obs,sum.alouetteNat,by="year") %>% 
+  mutate(ratio2 = n.observationsAlNat/n.observationstot) #%>% 
+#filter(year != 2014,year !=2001)
+
+
+ratio.tablAlNat <- left_join(sum.obs, sum.alouetteNat, by = "year") %>%
+  mutate(ratio2 = n.observationsAlNat / n.observationstot) %>%
+  mutate(ratio2_norm = ratio2 / ratio2[year == 2001])
+#diviser les valeurs par celle de 2001
+
+
+# Calcul de la régression linéaire
+model <- lm(ratio2_norm ~ year, data = ratio.tablAlNat)
+summary_model <- summary(model)
+coeffs <- summary_model$coefficients
+
+# Extraction des valeurs importantes
+a <- round(coeffs[1, 1], 4)  # Intercept
+b <- round(coeffs[2, 1], 4)  # Pente
+r2 <- round(summary_model$r.squared, 4)  # R²
+p_value <- round(coeffs[2, 4], 4)  # p-value de la pente
+
+# Calcul des intervalles de confiance à 95%
+conf_int <- confint(model, level = 0.95)
+conf_low <- round(conf_int[2, 1], 4)
+conf_high <- round(conf_int[2, 2], 4)
+
+# Création du texte de la légende
+legend_text <- paste0("y = ", a, " + ", b, "x\n",
+                      "R² = ", r2, "\n",
+                      "p-value = ", p_value, "\n",
+                      "IC 95%: [", conf_low, ", ", conf_high, "]")
+
+# Graphique avec ggplot
+ggplot(ratio.tablAlNat, aes(x = year)) +
+  geom_smooth(aes(y = ratio2_norm), method = lm, fill = 'orange', color = 'orange') +
+  labs(x = "Années", y = "Abondance relative",
+       title = "Abondance relative de l'Alouette des champs à l'échelle nationale",
+       caption = "PIR Science Participative", subtitle = "Alauda arvensis") +
+  theme_classic() +
+  geom_point(aes(y = ratio2_norm), colour = 'orange', size = 1) +
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5)) +
+  annotate("text", x = max(ratio.tablAlNat$year) - 0,  # Déplacement à droite
+           y = max(ratio.tablAlNat$ratio2_norm) * 0.9,  # Déplacement vers le haut
+           label = legend_text, hjust = 1, size = 3.5, color = "black")
+
+
+
+# tourterelle nationale en pause car trop bizzarre : croissance ???---------------------------------------------------
+
+sum.tourtNatio = tourt %>% 
+  st_drop_geometry() %>% #retire la partie spatial epour faciliter le traitement des données numériques
+  group_by(year) %>%  #groupe par année (première colone = année)
+  summarize(n.observationsToNatio = n(), n.observateurs = n_distinct(recordedBy) ) %>% #crée deux nouvelles colonnes
+  #nombre d'observations = nombre de ligne alouette par an
+  #nombre d'observateurs = nombre de noms différents ayant fait ces observations d'alouettes par an
+  mutate(ratio1 = n.observationsToNatio/n.observateurs) #nouvelle colonne qui résume le ratio des deux
+
+ratio.tabltourtNat = left_join(sum.obs,sum.tourtNatio,by="year") %>% 
+  mutate(ratio2 = n.observationsToNatio/n.observationstot) #%>% 
+#filter(year != 2014,year !=2001)
+
+
+ratio.tabltourtNat <- left_join(sum.obs, sum.tourtNatio, by = "year") %>%
+  mutate(ratio2 = n.observationsToNatio / n.observationstot) %>%
+  mutate(ratio2_norm = ratio2 / ratio2[year == 2001])
+#diviser les valeurs par celle de 2001
+
+
+# Calcul de la régression linéaire
+model <- lm(ratio2_norm ~ year, data = ratio.tabltourtNat)
+summary_model <- summary(model)
+coeffs <- summary_model$coefficients
+
+# Extraction des valeurs importantes
+a <- round(coeffs[1, 1], 4)  # Intercept
+b <- round(coeffs[2, 1], 4)  # Pente
+r2 <- round(summary_model$r.squared, 4)  # R²
+p_value <- round(coeffs[2, 4], 4)  # p-value de la pente
+
+# Calcul des intervalles de confiance à 95%
+conf_int <- confint(model, level = 0.95)
+conf_low <- round(conf_int[2, 1], 4)
+conf_high <- round(conf_int[2, 2], 4)
+
+# Création du texte de la légende
+legend_text <- paste0("y = ", a, " + ", b, "x\n",
+                      "R² = ", r2, "\n",
+                      "p-value = ", p_value, "\n",
+                      "IC 95%: [", conf_low, ", ", conf_high, "]")
+
+# Graphique avec ggplot
+ggplot(ratio.tabltourtNat, aes(x = year)) +
+  geom_smooth(aes(y = ratio2_norm), method = lm, fill = 'orange', color = 'orange') +
+  labs(x = "Années", y = "Abondance relative",
+       title = "Abondance relative de la tourterelle des bois à l'échelle nationale",
+       caption = "PIR Science Participative", subtitle = "Streptopelia turtur") +
+  theme_classic() +
+  geom_point(aes(y = ratio2_norm), colour = 'orange', size = 1) +
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5)) +
+  annotate("text", x = max(ratio.tabltourtNat$year) - 0,  # Déplacement à droite
+           y = max(ratio.tabltourtNat$ratio2_norm) * 0.9,  # Déplacement vers le haut
+           label = legend_text, hjust = 1, size = 3.5, color = "black")
+
 
