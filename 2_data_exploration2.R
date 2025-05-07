@@ -760,7 +760,6 @@ ggplot(ratio.tablAlNat, aes(x = year)) +
 
 
 
-
 # tourterelle nationale en pause car trop bizzarre : croissance ???---------------------------------------------------
 
 sum.tourtNatio = tourt %>% 
@@ -819,3 +818,195 @@ ggplot(ratio.tabltourtNat, aes(x = year)) +
            label = legend_text, hjust = 1, size = 3.5, color = "black")
 
 
+
+
+# linotte mélodieuse ------------------------------------------------------
+
+sum.linotte.bret = linotte.bret %>% 
+  st_drop_geometry() %>% #retire la partie spatial epour faciliter le traitement des données numériques
+  group_by(year) %>%  #groupe par année (première colone = année)
+  summarize(n.observationsLi = n(), n.observateurs = n_distinct(recordedBy) ) %>% #crée deux nouvelles colonnes
+  #nombre d'observations = nombre de ligne alouette par an
+  #nombre d'observateurs = nombre de noms différents ayant fait ces observations d'alouettes par an
+  mutate(ratio1 = n.observationsLi/n.observateurs) #nouvelle colonne qui résume le ratio des deux
+
+ratio.tablLi = left_join(sum.obs,sum.linotte.bret,by="year") %>% 
+  mutate(ratio2 = n.observationsLi/n.observationstot) #%>% 
+#filter(year != 2014,year !=2001)
+
+
+ratio.tablLi <- left_join(sum.obs, sum.linotte.bret, by = "year") %>%
+  mutate(ratio2 = n.observationsLi / n.observationstot) %>%
+  mutate(ratio2_norm = ratio2 / ratio2[year == 2001])
+#diviser les valeurs par celle de 2001
+
+
+# Calcul de la régression linéaire
+model <- lm(ratio2_norm ~ year, data = ratio.tablLi)
+summary_model <- summary(model)
+coeffs <- summary_model$coefficients
+
+# Extraction des valeurs importantes
+a <- round(coeffs[1, 1], 4)  # Intercept
+b <- round(coeffs[2, 1], 4)  # Pente
+r2 <- round(summary_model$r.squared, 4)  # R²
+p_value <- round(coeffs[2, 4], 4)  # p-value de la pente
+
+# Calcul des intervalles de confiance à 95%
+conf_int <- confint(model, level = 0.95)
+conf_low <- round(conf_int[2, 1], 4)
+conf_high <- round(conf_int[2, 2], 4)
+
+# Création du texte de la légende
+legend_text <- paste0("y = ", a, " + ", b, "x\n",
+                      "R² = ", r2, "\n",
+                      "p-value = ", p_value, "\n",
+                      "IC 95%: [", conf_low, ", ", conf_high, "]")
+
+# Graphique avec ggplot
+ggplot(ratio.tablLi, aes(x = year)) +
+  geom_smooth(aes(y = ratio2_norm), method = lm, fill = 'green', color = 'green') +
+  labs(x = "Années", y = "Abondance relative",
+       title = "Abondance relative de la Linotte mélodieuse au ccours des années",
+       caption = "PIR Science Participative", subtitle = "Linaria cannabina") +
+  theme_classic() +
+  geom_point(aes(y = ratio2_norm), colour = 'green', size = 1) +
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5)) +
+  annotate("text", x = max(ratio.tablLi$year) - 0,  # Déplacement à droite
+           y = max(ratio.tablLi$ratio2_norm) * 0.9,  # Déplacement vers le haut
+           label = legend_text, hjust = 1, size = 3.5, color = "black")
+
+
+# fauvette grisette -------------------------------------------------------
+
+
+sum.fauvette.bret = fauvette.bret %>% 
+  st_drop_geometry() %>% #retire la partie spatial epour faciliter le traitement des données numériques
+  group_by(year) %>%  #groupe par année (première colone = année)
+  summarize(n.observationsFa = n(), n.observateurs = n_distinct(recordedBy) ) %>% #crée deux nouvelles colonnes
+  #nombre d'observations = nombre de ligne alouette par an
+  #nombre d'observateurs = nombre de noms différents ayant fait ces observations d'alouettes par an
+  mutate(ratio1 = n.observationsFa/n.observateurs) #nouvelle colonne qui résume le ratio des deux
+
+ratio.tablFa = left_join(sum.obs,sum.fauvette.bret,by="year") %>% 
+  mutate(ratio2 = n.observationsFa/n.observationstot) #%>% 
+#filter(year != 2014,year !=2001)
+
+
+ratio.tablFa <- left_join(sum.obs, sum.fauvette.bret, by = "year") %>%
+  mutate(ratio2 = n.observationsFa / n.observationstot) %>%
+  mutate(ratio2_norm = ratio2 / ratio2[year == 2001])
+#diviser les valeurs par celle de 2001
+
+
+# Calcul de la régression linéaire
+model <- lm(ratio2_norm ~ year, data = ratio.tablFa)
+summary_model <- summary(model)
+coeffs <- summary_model$coefficients
+
+# Extraction des valeurs importantes
+a <- round(coeffs[1, 1], 4)  # Intercept
+b <- round(coeffs[2, 1], 4)  # Pente
+r2 <- round(summary_model$r.squared, 4)  # R²
+p_value <- round(coeffs[2, 4], 4)  # p-value de la pente
+
+# Calcul des intervalles de confiance à 95%
+conf_int <- confint(model, level = 0.95)
+conf_low <- round(conf_int[2, 1], 4)
+conf_high <- round(conf_int[2, 2], 4)
+
+# Création du texte de la légende
+legend_text <- paste0("y = ", a, " + ", b, "x\n",
+                      "R² = ", r2, "\n",
+                      "p-value = ", p_value, "\n",
+                      "IC 95%: [", conf_low, ", ", conf_high, "]")
+
+# Graphique avec ggplot
+ggplot(ratio.tablFa, aes(x = year)) +
+  geom_smooth(aes(y = ratio2_norm), method = lm, fill = 'yellow', color = 'yellow') +
+  labs(x = "Années", y = "Abondance relative",
+       title = "Abondance relative de la Fauvette grisette au ccours des années",
+       caption = "PIR Science Participative", subtitle = "Sylvia communis") +
+  theme_classic() +
+  geom_point(aes(y = ratio2_norm), colour = 'yellow', size = 1) +
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5)) +
+  annotate("text", x = max(ratio.tablFa$year) - 0,  # Déplacement à droite
+           y = max(ratio.tablFa$ratio2_norm) * 0.9,  # Déplacement vers le haut
+           label = legend_text, hjust = 1, size = 3.5, color = "black")
+
+
+
+# multi-espèces -----------------------------------------------------------
+model <- lm(ratio2_norm ~ year, data = ratio.tablFa)
+summary_model <- summary(model)
+coeffs <- summary_model$coefficients
+
+# Extraction des valeurs importantes
+a <- round(coeffs[1, 1], 4)  # Intercept
+b <- round(coeffs[2, 1], 4)  # Pente
+r2 <- round(summary_model$r.squared, 4)  # R²
+p_value <- round(coeffs[2, 4], 4)  # p-value de la pente
+
+# Calcul des intervalles de confiance à 95%
+conf_int <- confint(model, level = 0.95)
+conf_low <- round(conf_int[2, 1], 4)
+conf_high <- round(conf_int[2, 2], 4)
+
+# Création du texte de la légende
+legend_text <- paste0("y = ", a, " + ", b, "x\n",
+                      "R² = ", r2, "\n",
+                      "p-value = ", p_value, "\n",
+                      "IC 95%: [", conf_low, ", ", conf_high, "]")
+
+# Graphique avec ggplot
+ggplot(ratio.tablFa, aes(x = year)) +
+  geom_smooth(aes(y = ratio2_norm), method = lm, fill = 'yellow', color = 'yellow') +
+  labs(x = "Années", y = "Abondance relative",
+       title = "Abondance relative de la Fauvette grisette au ccours des années",
+       caption = "PIR Science Participative", subtitle = "Sylvia communis") +
+  theme_classic() +
+  geom_point(aes(y = ratio2_norm), colour = 'yellow', size = 1) +
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5)) +
+  annotate("text", x = max(ratio.tablFa$year) - 0,  # Déplacement à droite
+           y = max(ratio.tablFa$ratio2_norm) * 0.9,  # Déplacement vers le haut
+           label = legend_text, hjust = 1, size = 3.5, color = "black")
+
+ratio.tablMulti <- left_join(ratio.tablCh, ratio.alouettenbobse, by = "year") %>% 
+  mutate(ratioCh=ratio2.x)
+names(ratio.tablMulti)[names(ratio.tablMulti)== 'ratio2_norm.x'] <- "ratio2_normCh"
+names(ratio.tablMulti)[names(ratio.tablMulti)== 'ratio2_norm.y'] <- "ratio2_normAl"
+ratio.tablMulti <- left_join(ratio.tablMulti, ratio.tablTo, by = "year")
+names(ratio.tablMulti)[names(ratio.tablMulti)== 'ratio2_norm'] <- "ratio2_normTo"
+ratio.tablMulti <- left_join(ratio.tablMulti, ratio.BJobsparotot, by = "year")
+names(ratio.tablMulti)[names(ratio.tablMulti)== 'ratio2_norm'] <- "ratio2_normBj"
+
+ggplot(ratio.tablMulti, aes(x=year))+
+  geom_point(aes(y = ratio2_normAl), colour = 'red', size = 1)+
+  geom_point(aes(y = ratio2_normCh), colour = 'purple', size = 1)+
+  geom_point(aes(y = ratio2_normTo), colour = 'blue', size = 1)+
+  geom_point(aes(y = ratio2_normBj), colour = 'orange', size = 1)+
+  theme_classic() +
+  labs(x = "Années", y = "Abondance relative",
+       title = "Abondance relative des 4 espèces au cours des années",
+       caption = "PIR Science Participative", subtitle = "")+
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5))
+
+ggplot(ratio.tablMulti, aes(x=year))+
+  geom_point(aes(y = ratio2_normAl), colour = 'red', size = 1)+
+  geom_point(aes(y = ratio2_normCh), colour = 'purple', size = 1)+
+  geom_point(aes(y = ratio2_normTo), colour = 'blue', size = 1)+
+  geom_point(aes(y = ratio2_normBj), colour = 'orange', size = 1)+
+  geom_smooth(aes(y = ratio2_normAl), method = lm, fill = 'red', color = 'red') +
+  geom_smooth(aes(y = ratio2_normCh), method = lm, fill = 'purple', color = 'purple') +
+  geom_smooth(aes(y = ratio2_normTo), method = lm, fill = 'blue', color = 'blue') +
+  geom_smooth(aes(y = ratio2_normBj), method = lm, fill = 'orange', color = 'orange') +
+  theme_classic() +
+  labs(x = "Années", y = "Abondance relative",
+       title = "Abondance relative des 4 espèces au cours des années",
+       caption = "PIR Science Participative", subtitle = "")+
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5))

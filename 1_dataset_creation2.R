@@ -17,8 +17,14 @@ mydat = read.csv2("data/0041794-241126133413365.csv", sep = '\t') # note pour Oc
 
 data.bret = read.csv2("data/data_bret.csv")
 charbo.bret = read.csv2("data/charbo.bret.csv")
+alouette.bret = read.csv2("data/alouette_bret.csv")
 alouette_bret = read.csv2("data/alouette_bret.csv")
-alouette_bret = read.csv2("data/alouette_bret.csv")
+
+tourt.bret = read.csv2("data/tourt.bret.csv")
+bruantj.bret = read.csv2("data/bruantj.bret.csv")
+
+fauvette.bret = read.csv2("data/fauvette.bret.csv")
+linotte.bret = read.csv2("data/linotte.bret.csv")
 
 #stocker dans une variable les données concernant uniquement les espèces spécialistes : alouette des champs et bruant jaune
 alouette = mydat %>%  filter(species == "Alauda arvensis")
@@ -113,6 +119,7 @@ ggplot() +
 #passer montanus moineau friquet
 moinfri = mydat %>%  filter(species == "Passer montanus")
 
+linotte.bret = data.bret %>% filter(species=='Linaria cannabina')
 #convertir les donées STOC qui contiennent déjà des colonnes Longitude et Latitude
 #en objet spatial aussi (les données Lon Lat sont reconnues grâce au système de coordonnées)
 moinfri = st_as_sf(moinfri,coords = c("decimalLongitude","decimalLatitude"), crs = 4326)
@@ -233,7 +240,7 @@ write.csv2(linotte.bret, "data/linotte.bret.csv")
 
 saveRDS(fauvette.bret, "data/fauvette.bret.RDS")
 write.csv2(fauvette.bret, "data/fauvette.bret.csv")
-
+#linotte et fauvette
 
 # Pour le fun : créer une carte interactive -------------------------------
 
