@@ -284,12 +284,14 @@ write.csv2(ratio.tablFa, "data/ratio.tablFa.csv")
 write.csv2(ratio.tablFaNat, "data/ratio.tablFaNat.csv")
 write.csv2(ratio.tablCh, "data/ratio.tablCh.csv")
 write.csv2(ratio.tablcharboNat, "data/ratio.tablcharboNat.csv")
-write.csv2(ratio.tablCh, "data/ratio.tablCh.csv")
+write.csv2(ratio.tablTo, "data/ratio.tablTo.csv")
 write.csv2(ratio.tabltourtNat, "data/ratio.tabltourtNat.csv")
 
 write.csv2(sum.obs, "data/sum.obs.csv")
 write.csv2(sum.observateurs, "data/sum.observateurs.csv")
 write.csv2(sum.bret, "data/sum.bret.csv")
+write.csv2(sum.obsNat, "data/sum.obsNat.csv")
+
 
 #linotte et fauvette
 

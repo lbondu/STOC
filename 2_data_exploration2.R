@@ -1082,6 +1082,10 @@ fauvette = mydat %>% filter(species == "Sylvia communis")
 linotte = mydat %>% filter(species == "Linaria cannabina")
 merle = mydat %>% filter(species == "Turdus merula")
 
+sum.obsNat = mydat %>% 
+  st_drop_geometry() %>% 
+  group_by(year) %>% 
+  summarize( n.observationstotnat = n_distinct(occurrenceID) ) 
 
 
 # alouette nationale ------------------------------------------------------
@@ -1093,13 +1097,13 @@ sum.alouetteNat = alouette %>%
   #nombre d'observations = nombre de ligne alouette par an
   #nombre d'observateurs = nombre de noms différents ayant fait ces observations d'alouettes par an
   mutate(ratio1 = n.observationsAlNat/n.observateurs) #nouvelle colonne qui résume le ratio des deux
-ratio.tablAlNat = left_join(sum.obs,sum.alouetteNat,by="year") %>% 
-  mutate(ratio2 = n.observationsAlNat/n.observationstot) #%>% 
+ratio.tablAlNat = left_join(sum.obsNat,sum.alouetteNat,by="year") %>% 
+  mutate(ratio2 = n.observationsAlNat/n.observationstotnat) #%>% 
 #filter(year != 2014,year !=2001)
 
 
-ratio.tablAlNat <- left_join(sum.obs, sum.alouetteNat, by = "year") %>%
-  mutate(ratio2 = n.observationsAlNat / n.observationstot) %>%
+ratio.tablAlNat <- left_join(sum.obsNat, sum.alouetteNat, by = "year") %>%
+  mutate(ratio2 = n.observationsAlNat / n.observationstotnat) %>%
   mutate(ratio2_norm = ratio2 / ratio2[year == 2001])
 #diviser les valeurs par celle de 2001
 
@@ -1151,13 +1155,13 @@ sum.tourtNatio = tourt %>%
   #nombre d'observateurs = nombre de noms différents ayant fait ces observations d'alouettes par an
   mutate(ratio1 = n.observationsToNatio/n.observateurs) #nouvelle colonne qui résume le ratio des deux
 
-ratio.tabltourtNat = left_join(sum.obs,sum.tourtNatio,by="year") %>% 
-  mutate(ratio2 = n.observationsToNatio/n.observationstot) #%>% 
+ratio.tabltourtNat = left_join(sum.obsNat,sum.tourtNatio,by="year") %>% 
+  mutate(ratio2 = n.observationsToNatio/n.observationstotnat) #%>% 
 #filter(year != 2014,year !=2001)
 
 
-ratio.tabltourtNat <- left_join(sum.obs, sum.tourtNatio, by = "year") %>%
-  mutate(ratio2 = n.observationsToNatio / n.observationstot) %>%
+ratio.tabltourtNat <- left_join(sum.obsNat, sum.tourtNatio, by = "year") %>%
+  mutate(ratio2 = n.observationsToNatio / n.observationstotnat) %>%
   mutate(ratio2_norm = ratio2 / ratio2[year == 2001])
 #diviser les valeurs par celle de 2001
 
@@ -1210,13 +1214,13 @@ sum.BJNatio = bruantj %>%
   #nombre d'observateurs = nombre de noms différents ayant fait ces observations d'alouettes par an
   mutate(ratio1 = n.observationsBJnatio/n.observateurs) #nouvelle colonne qui résume le ratio des deux
 
-ratio.tablBJNat = left_join(sum.obs,sum.BJNatio,by="year") %>% 
-  mutate(ratio2 = n.observationsBJnatio/n.observationstot) #%>% 
+ratio.tablBJNat = left_join(sum.obsNat,sum.BJNatio,by="year") %>% 
+  mutate(ratio2 = n.observationsBJnatio/n.observationstotnat) #%>% 
 #filter(year != 2014,year !=2001)
 
 
-ratio.tablBJNat <- left_join(sum.obs, sum.BJNatio, by = "year") %>%
-  mutate(ratio2 = n.observationsBJnatio / n.observationstot) %>%
+ratio.tablBJNat <- left_join(sum.obsNat, sum.BJNatio, by = "year") %>%
+  mutate(ratio2 = n.observationsBJnatio / n.observationstotnat) %>%
   mutate(ratio2_norm = ratio2 / ratio2[year == 2001])
 #diviser les valeurs par celle de 2001
 
@@ -1269,13 +1273,13 @@ sum.charboNatio = charbo %>%
   #nombre d'observateurs = nombre de noms différents ayant fait ces observations d'alouettes par an
   mutate(ratio1 = n.observationscharbonatio/n.observateurs) #nouvelle colonne qui résume le ratio des deux
 
-ratio.tablcharboNat = left_join(sum.obs,sum.charboNatio,by="year") %>% 
-  mutate(ratio2 = n.observationscharbonatio/n.observationstot) #%>% 
+ratio.tablcharboNat = left_join(sum.obsNat,sum.charboNatio,by="year") %>% 
+  mutate(ratio2 = n.observationscharbonatio/n.observationstotnat) #%>% 
 #filter(year != 2014,year !=2001)
 
 
-ratio.tablcharboNat <- left_join(sum.obs, sum.charboNatio, by = "year") %>%
-  mutate(ratio2 = n.observationscharbonatio / n.observationstot) %>%
+ratio.tablcharboNat <- left_join(sum.obsNat, sum.charboNatio, by = "year") %>%
+  mutate(ratio2 = n.observationscharbonatio / n.observationstotnat) %>%
   mutate(ratio2_norm = ratio2 / ratio2[year == 2001])
 #diviser les valeurs par celle de 2001
 
@@ -1327,13 +1331,13 @@ sum.linotteNatio = linotte %>%
   #nombre d'observateurs = nombre de noms différents ayant fait ces observations d'alouettes par an
   mutate(ratio1 = n.observationslinottenatio/n.observateurs) #nouvelle colonne qui résume le ratio des deux
 
-ratio.tabllinotteNat = left_join(sum.obs,sum.linotteNatio,by="year") %>% 
-  mutate(ratio2 = n.observationslinottenatio/n.observationstot) #%>% 
+ratio.tabllinotteNat = left_join(sum.obsNat,sum.linotteNatio,by="year") %>% 
+  mutate(ratio2 = n.observationslinottenatio/n.observationstotnat) #%>% 
 #filter(year != 2014,year !=2001)
 
 
-ratio.tabllinotteNat <- left_join(sum.obs, sum.linotteNatio, by = "year") %>%
-  mutate(ratio2 = n.observationslinottenatio / n.observationstot) %>%
+ratio.tabllinotteNat <- left_join(sum.obsNat, sum.linotteNatio, by = "year") %>%
+  mutate(ratio2 = n.observationslinottenatio / n.observationstotnat) %>%
   mutate(ratio2_norm = ratio2 / ratio2[year == 2001])
 #diviser les valeurs par celle de 2001
 
@@ -1386,13 +1390,13 @@ sum.FaNatio = fauvette %>%
   #nombre d'observateurs = nombre de noms différents ayant fait ces observations d'alouettes par an
   mutate(ratio1 = n.observationsFanatio/n.observateurs) #nouvelle colonne qui résume le ratio des deux
 
-ratio.tablFaNat = left_join(sum.obs,sum.FaNatio,by="year") %>% 
-  mutate(ratio2 = n.observationsFanatio/n.observationstot) #%>% 
+ratio.tablFaNat = left_join(sum.obsNat,sum.FaNatio,by="year") %>% 
+  mutate(ratio2 = n.observationsFanatio/n.observationstotnat) #%>% 
 #filter(year != 2014,year !=2001)
 
 
-ratio.tablFaNat <- left_join(sum.obs, sum.FaNatio, by = "year") %>%
-  mutate(ratio2 = n.observationsFanatio / n.observationstot) %>%
+ratio.tablFaNat <- left_join(sum.obsNat, sum.FaNatio, by = "year") %>%
+  mutate(ratio2 = n.observationsFanatio / n.observationstotnat) %>%
   mutate(ratio2_norm = ratio2 / ratio2[year == 2001])
 #diviser les valeurs par celle de 2001
 
@@ -1445,13 +1449,13 @@ sum.merleNatio = merle %>%
   #nombre d'observateurs = nombre de noms différents ayant fait ces observations d'alouettes par an
   mutate(ratio1 = n.observationsmerlenatio/n.observateurs) #nouvelle colonne qui résume le ratio des deux
 
-ratio.tablmerleNat = left_join(sum.obs,sum.merleNatio,by="year") %>% 
-  mutate(ratio2 = n.observationsmerlenatio/n.observationstot) #%>% 
+ratio.tablmerleNat = left_join(sum.obsNat,sum.merleNatio,by="year") %>% 
+  mutate(ratio2 = n.observationsmerlenatio/n.observationstotnat) #%>% 
 #filter(year != 2014,year !=2001)
 
 
-ratio.tablmerleNat <- left_join(sum.obs, sum.merleNatio, by = "year") %>%
-  mutate(ratio2 = n.observationsmerlenatio / n.observationstot) %>%
+ratio.tablmerleNat <- left_join(sum.obsNat, sum.merleNatio, by = "year") %>%
+  mutate(ratio2 = n.observationsmerlenatio / n.observationstotnat) %>%
   mutate(ratio2_norm = ratio2 / ratio2[year == 2001])
 #diviser les valeurs par celle de 2001
 
