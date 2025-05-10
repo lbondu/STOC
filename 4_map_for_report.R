@@ -41,7 +41,78 @@ plot(st_geometry(dep56_29))
 Bret = st_union(dep35_22,dep56_29)
 plot(st_geometry(Bret))
 
-alouette.bret = st_as_sf(alouette.bret,coords = c("decimalLongitude","decimalLatitude"), crs = 4326)
+alouette.bret = st_as_sf(alouette.bret,coords = geometry, crs = 4326)
+
+#conversion - regelment de pb
+alouette.bret <- alouette.bret %>%
+  mutate(
+    lon = as.numeric(sub("c\\(([^,]+),.*", "\\1", geometry)),
+    lat = as.numeric(sub("c\\([^,]+,\\s*([^\\)]+)\\)", "\\1", geometry))
+  )
+
+# Étape 2 : Convertir en objet sf
+alouette.bret <- st_as_sf(alouette.bret, coords = c("lon", "lat"), crs = 4326)
+
+#conversion - regelment de pb
+charbo.bret <- charbo.bret %>%
+  mutate(
+    lon = as.numeric(sub("c\\(([^,]+),.*", "\\1", geometry)),
+    lat = as.numeric(sub("c\\([^,]+,\\s*([^\\)]+)\\)", "\\1", geometry))
+  )
+
+# Étape 2 : Convertir en objet sf
+charbo.bret <- st_as_sf(charbo.bret, coords = c("lon", "lat"), crs = 4326)
+
+#conversion - regelment de pb
+bruantj.bret <- bruantj.bret %>%
+  mutate(
+    lon = as.numeric(sub("c\\(([^,]+),.*", "\\1", geometry)),
+    lat = as.numeric(sub("c\\([^,]+,\\s*([^\\)]+)\\)", "\\1", geometry))
+  )
+
+# Étape 2 : Convertir en objet sf
+bruantj.bret <- st_as_sf(bruantj.bret, coords = c("lon", "lat"), crs = 4326)
+
+#conversion - regelment de pb
+tourt.bret <- tourt.bret %>%
+  mutate(
+    lon = as.numeric(sub("c\\(([^,]+),.*", "\\1", geometry)),
+    lat = as.numeric(sub("c\\([^,]+,\\s*([^\\)]+)\\)", "\\1", geometry))
+  )
+
+# Étape 2 : Convertir en objet sf
+tourt.bret <- st_as_sf(tourt.bret, coords = c("lon", "lat"), crs = 4326)
+
+#conversion - regelment de pb
+linotte.bret <- linotte.bret %>%
+  mutate(
+    lon = as.numeric(sub("c\\(([^,]+),.*", "\\1", geometry)),
+    lat = as.numeric(sub("c\\([^,]+,\\s*([^\\)]+)\\)", "\\1", geometry))
+  )
+
+# Étape 2 : Convertir en objet sf
+linotte.bret <- st_as_sf(linotte.bret, coords = c("lon", "lat"), crs = 4326)
+
+#conversion - regelment de pb
+fauvette.bret <- fauvette.bret %>%
+  mutate(
+    lon = as.numeric(sub("c\\(([^,]+),.*", "\\1", geometry)),
+    lat = as.numeric(sub("c\\([^,]+,\\s*([^\\)]+)\\)", "\\1", geometry))
+  )
+
+# Étape 2 : Convertir en objet sf
+fauvette.bret <- st_as_sf(fauvette.bret, coords = c("lon", "lat"), crs = 4326)
+
+#conversion - regelment de pb
+merle.bret <- merle.bret %>%
+  mutate(
+    lon = as.numeric(sub("c\\(([^,]+),.*", "\\1", geometry)),
+    lat = as.numeric(sub("c\\([^,]+,\\s*([^\\)]+)\\)", "\\1", geometry))
+  )
+
+# Étape 2 : Convertir en objet sf
+merle.bret <- st_as_sf(merle.bret, coords = c("lon", "lat"), crs = 4326)
+
 
 
 # carte des observations d'alouettes
@@ -71,11 +142,17 @@ library(tmap)
 tmap_mode("view")
 
 tm_shape(charbo.bret) + 
-  tm_dots(col = "grey", size = 0.1)+
+  tm_dots(col = "purple", size = 0.1)+
   tm_shape(bruantj.bret) + 
-  tm_dots(col = "yellow", size = 0.1)+ #trace les points, size définit leur taille
+  tm_dots(col = "orange", size = 0.1)+ #trace les points, size définit leur taille
   tm_shape(alouette.bret) + 
-  tm_dots(col = "brown", size = 0.1)+
+  tm_dots(col = "red", size = 0.1)+
+  tm_shape(tourt.bret) + 
+  tm_dots(col = "blue", size = 0.1)+
+  tm_shape(alouette.bret) + 
+  tm_dots(col = "red", size = 0.1)+
+  tm_shape(linotte.bret) + 
+  tm_dots(col = "green", size = 0.1)+
   tm_layout(title = "Observations des espèces (STOC-EPS) en Bretagne",
             legend.show = TRUE,
             legend.outside = TRUE)

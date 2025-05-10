@@ -11,6 +11,13 @@ library(dplyr) #permet d'utiliser %>%, filter, summarize et bien d'autres.
 library(sf) #pour manipuler des objets spatiaux
 library(ggplot2)  #pour les graphiques
 
+linotte.bret = data.bret %>% filter(species=='Linaria cannabina')
+alouette.bret = data.bret %>% filter(species=='Alauda arvensis')
+charbo.bret = data.bret %>% filter(species=='Parus major')
+bruantj.bret = data.bret %>% filter(species=='Emberiza citrinella')
+tourt.bret = data.bret %>% filter(species=='Streptopelia turtur')
+linotte.bret = data.bret %>% filter(species=='Linaria cannabina')
+merle.bret = data.bret %>%  filter(species=='Turdus merula')
 
 #importer les données STOC
 mydat = read.csv2("data/0041794-241126133413365.csv", sep = '\t') # note pour Océane: pense à mettre le fichier de données dans le dossier STOC_Bret/data !
@@ -33,6 +40,10 @@ bruantj = mydat %>% filter(species == "Emberiza citrinella")
 #idem pour les espèces généralistes tourterelle des bois et mésange charbonnière
 tourt = mydat %>% filter(species == "Streptopelia turtur")
 charbo = mydat %>% filter(species == "Parus major")
+
+fauvette = mydat %>% filter(species == "Linaria cannabina")
+linotte = mydat %>% filter(species == "Sylvia commnuis")
+merle = mydat %>% filter(species == "Turdus merula")
 
 #importer une carte de l'Ille et Vilaine (polygone au format shapefile, donc un objet spatial)
 #pour les objets spatiaux utiliser st_read
@@ -143,11 +154,13 @@ charbo = st_as_sf(charbo,coords = c("decimalLongitude","decimalLatitude"), crs =
 
 #représenter toutes les observations en Bretagne
 ggplot() + 
-  geom_sf(data = dep35) + #trace le contour du département 35
-  geom_sf(data= charbo, color = "grey")+
-  geom_sf(data = alouette, color = "blue") + #ajoute les données d'observation d'alouette 
-  geom_sf(data= bruantj, color = "yellow")+
-  geom_sf(data= tourt, color = "brown")+
+  geom_sf(data = Bret) + #trace le contour du département 35
+  geom_sf(data= charbo.bret, color = "purple")+
+  geom_sf(data = alouette.bret, color = "red") + #ajoute les données d'observation d'alouette 
+  geom_sf(data= bruantj.bret, color = "yellow")+
+  geom_sf(data= tourt.bret, color = "blue")+
+  geom_sf(data= linotte.bret, color = "green")+
+  geom_sf(data= fauvette.bret, color = "pink")+
   coord_sf(xlim = c(-6,0), ylim = c(46,49.5), expand = FALSE) #restreint ce qu'on voit de ces données à une zone en Bretagne
 
 #extraire les données en Ille-et-Vilaine
@@ -157,18 +170,25 @@ charbo_in_dep35 <- st_intersection(charbo, dep35)
 
 #représneter
 ggplot() + 
-  geom_sf(data = dep35, fill = "white", color = "black") + # Contour du département
-  geom_sf(data = charbo_in_dep35, aes(color = "Mésange charbonnière"), size = 1) + # Points pour mésange charbonnière
-  geom_sf(data = alouette_in_dep35, aes(color = "Alouette des champs"), size = 1) + # Points pour alouette
-  geom_sf(data = bruantj_in_dep35, aes(color = "Bruant jaune"), size = 1) + # Points pour bruant jaune
-  geom_sf(data = tourt_in_dep35, aes(color = "Tourterelle des bois"), size = 1) + # Points pour tourterelle
-  scale_color_manual(values = c("Mésange charbonnière" = "grey", #pour ajouter une légende manuellement
-                                "Alouette des champs" = "blue", 
-                                "Bruant jaune" = "yellow", 
-                                "Tourterelle des bois" = "brown")) + # Couleurs spécifiques pour chaque espèce
+  geom_sf(data = Bret, fill = "white", color = "black") + # Contour du département
+  geom_sf(data = charbo.bret, aes(color = "Great tit"), size = 1) + # Points pour mésange charbonnière
+  geom_sf(data = merle.bret, aes(color = "Common blackbird"), size = 1)+
+  geom_sf(data = alouette.bret, aes(color = "Eurasian skylark"), size = 1) + # Points pour alouette
+  geom_sf(data = bruantj.bret, aes(color = "Yellowhamer"), size = 1) + # Points pour bruant jaune
+  geom_sf(data = tourt.bret, aes(color = "European turtle dove"), size = 1)+
+  geom_sf(data = linotte.bret, aes(color = "Common linnet"), size = 1)+
+  geom_sf(data = fauvette.bret, aes(color = "Common whitethroat"), size = 1)+ # Points pour tourterelle
+  scale_color_manual(values = c("Great tit" = "purple", #pour ajouter une légende manuellement
+                                "Eurasian skylark" = "red", 
+                                "Yellowhamer" = "orange", 
+                                "European turtle dove" = "blue",
+                                "Common linnet" = "green", 
+                                "Common whitethroat" = "brown",
+                                "Common blackbird" = "coral" )) + # Couleurs spécifiques pour chaque espèce
   theme_minimal() + #pour l'esthétique
-  ggtitle("Observations des espèces (STOC-EPS) en Ille-et-Vilaine")+
-  theme(legend.title = element_blank()) # Enlever le titre de la légende
+  ggtitle("STOC programm observations in Brittany")+
+  theme(legend.title = element_blank())+
+  theme(plot.title = element_text(hjust = 0.8))# Enlever le titre de la légende
 
 
 

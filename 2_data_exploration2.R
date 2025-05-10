@@ -15,7 +15,7 @@ library(ggpubr)
 # ici mettre votre chemin d'accès jusqu'au dossier où se trouvent les fichiers .RDS 
 # (penser à changer les \ en / )
 
-mypath = "D:/Home/lbondu/Documents/STOC_Bret-main/data"
+mypath = "C:/Users/enfants/Documents/Loïc/CPES/2/STOC_Bret-main/data"
 #mypath = "D:/Home/ocbegassat/Downloads/PIR-BREGER-BONDU-STOC/PIR-BREGER-BONDU-STOC"
 
 
@@ -33,8 +33,9 @@ charbo.bret = read.csv( paste0(mypath,"/charbo.bret.csv"), head = TRUE, sep=";")
 
 tourt.bret = read.csv( paste0(mypath,"/tourt.bret.csv"), head = TRUE, sep=";")
 
-data.bret = read.csv( paste0(mypath,"/data_bret.csv"), head = TRUE, sep=";")
-
+data.bret = read.csv( paste0(mypath,"/data.bret.csv"), head = TRUE, sep=";")
+data.bret = read.csv2(file = paste0(mypath,"/data.bret.csv"), head = TRUE, sep=";")
+#"C:\Users\enfants\Documents\Loïc\CPES\2\STOC_Bret-main\data\data.bret.csv"
 # Nombre d'observations et d'observateurs d'Alouettes ---------------------
 
 #Somme des observateurs et observations d'alouettes par an et ratio de l'un sur l'autre
@@ -90,7 +91,7 @@ ggplot(sum.bret) +
 sum.obs = data.bret %>% 
   st_drop_geometry() %>% 
   group_by(year) %>% 
-  summarize( n.observations = n_distinct(occurrenceID) ) 
+  summarize( n.observationstot = n_distinct(occurrenceID) ) 
 
 ggplot(sum.obs) +
   geom_point(aes(x=year, y = n.observations)) + theme_classic()
@@ -924,12 +925,12 @@ legend_text <- paste0("y = ", a, " + ", b, "x\n",
 
 # Graphique avec ggplot
 ggplot(ratio.tablFa, aes(x = year)) +
-  geom_smooth(aes(y = ratio2_norm), method = lm, fill = 'yellow', color = 'yellow') +
-  labs(x = "Années", y = "Abondance relative",
-       title = "Abondance relative de la Fauvette grisette au ccours des années",
-       caption = "PIR Science Participative", subtitle = "Sylvia communis") +
+  geom_smooth(aes(y = ratio2_norm), method = lm, fill = 'brown', color = 'brown') +
+  labs(x = "Years", y = "Relative abundance",
+       title = "RElative abundance of the Common whitethroat dove over the years",
+       caption = "", subtitle = "Sylvia communis") +
   theme_classic() +
-  geom_point(aes(y = ratio2_norm), colour = 'yellow', size = 1) +
+  geom_point(aes(y = ratio2_norm), colour = 'brown', size = 1) +
   theme(plot.title = element_text(hjust = 0.5),
         plot.subtitle = element_text(hjust = 0.5)) +
   annotate("text", x = max(ratio.tablFa$year) - 0,  # Déplacement à droite
@@ -937,6 +938,62 @@ ggplot(ratio.tablFa, aes(x = year)) +
            label = legend_text, hjust = 1, size = 3.5, color = "black")
 
 
+
+
+# merle noir -  Turdus merula - Common blackbird ------------------------------------------------
+sum.merle.bret = merle.bret %>% 
+  st_drop_geometry() %>% #retire la partie spatial epour faciliter le traitement des données numériques
+  group_by(year) %>%  #groupe par année (première colone = année)
+  summarize(n.observationsMe = n(), n.observateurs = n_distinct(recordedBy) ) %>% #crée deux nouvelles colonnes
+  #nombre d'observations = nombre de ligne alouette par an
+  #nombre d'observateurs = nombre de noms différents ayant fait ces observations d'alouettes par an
+  mutate(ratio1 = n.observationsMe/n.observateurs) #nouvelle colonne qui résume le ratio des deux
+
+ratio.tablLi = left_join(sum.obs,sum.merle.bret,by="year") %>% 
+  mutate(ratio2 = n.observationsMe/n.observationstot) #%>% 
+#filter(year != 2014,year !=2001)
+
+ratio.merle <- left_join(sum.obs, sum.merle.bret, by = "year") %>%
+  mutate(ratio2 = n.observationsMe / n.observationstot) %>%
+  mutate(ratio2_norm = ratio2 / ratio2[year == 2001])
+#diviser les valeurs par celle de 2001
+
+
+# Calcul de la régression linéaire
+model <- lm(ratio2_norm ~ year, data = ratio.merle)
+summary_model <- summary(model)
+coeffs <- summary_model$coefficients
+
+# Extraction des valeurs importantes
+a <- round(coeffs[1, 1], 4)  # Intercept
+b <- round(coeffs[2, 1], 4)  # Pente
+r2 <- round(summary_model$r.squared, 4)  # R²
+p_value <- round(coeffs[2, 4], 4)  # p-value de la pente
+
+# Calcul des intervalles de confiance à 95%
+conf_int <- confint(model, level = 0.95)
+conf_low <- round(conf_int[2, 1], 4)
+conf_high <- round(conf_int[2, 2], 4)
+
+# Création du texte de la légende
+legend_text <- paste0("y = ", a, " + ", b, "x\n",
+                      "R² = ", r2, "\n",
+                      "p-value = ", p_value, "\n",
+                      "IC 95%: [", conf_low, ", ", conf_high, "]")
+
+# Graphique avec ggplot
+ggplot(ratio.merle, aes(x = year)) +
+  geom_smooth(aes(y = ratio2_norm), method = lm, fill = 'coral', color = 'coral') +
+  labs(x = "Years", y = "Relative abundance",
+       title = "Relative abundance of the Common blackbird over the years",
+       caption = "", subtitle = "Turdus merula") +
+  theme_classic() +
+  geom_point(aes(y = ratio2_norm), colour = 'coral', size = 1) +
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5)) +
+  annotate("text", x = max(ratio.merle$year) - 0,  # Déplacement à droite
+           y = max(ratio.merle$ratio2_norm) * 0.95,  # Déplacement vers le haut
+           label = legend_text, hjust = 1, size = 3.5, color = "black")
 
 # multi-espèces -----------------------------------------------------------
 model <- lm(ratio2_norm ~ year, data = ratio.tablFa)
@@ -1010,3 +1067,429 @@ ggplot(ratio.tablMulti, aes(x=year))+
        caption = "PIR Science Participative", subtitle = "")+
   theme(plot.title = element_text(hjust = 0.5),
         plot.subtitle = element_text(hjust = 0.5))
+
+
+# national - intro  -------------------------------------------------------
+
+alouette = mydat %>%  filter(species == "Alauda arvensis")
+bruantj = mydat %>% filter(species == "Emberiza citrinella")
+
+#idem pour les espèces généralistes tourterelle des bois et mésange charbonnière
+tourt = mydat %>% filter(species == "Streptopelia turtur")
+charbo = mydat %>% filter(species == "Parus major")
+
+fauvette = mydat %>% filter(species == "Sylvia communis")
+linotte = mydat %>% filter(species == "Linaria cannabina")
+merle = mydat %>% filter(species == "Turdus merula")
+
+
+
+# alouette nationale ------------------------------------------------------
+
+sum.alouetteNat = alouette %>% 
+  st_drop_geometry() %>% #retire la partie spatial epour faciliter le traitement des données numériques
+  group_by(year) %>%  #groupe par année (première colone = année)
+  summarize(n.observationsAlNat = n(), n.observateurs = n_distinct(recordedBy) ) %>% #crée deux nouvelles colonnes
+  #nombre d'observations = nombre de ligne alouette par an
+  #nombre d'observateurs = nombre de noms différents ayant fait ces observations d'alouettes par an
+  mutate(ratio1 = n.observationsAlNat/n.observateurs) #nouvelle colonne qui résume le ratio des deux
+ratio.tablAlNat = left_join(sum.obs,sum.alouetteNat,by="year") %>% 
+  mutate(ratio2 = n.observationsAlNat/n.observationstot) #%>% 
+#filter(year != 2014,year !=2001)
+
+
+ratio.tablAlNat <- left_join(sum.obs, sum.alouetteNat, by = "year") %>%
+  mutate(ratio2 = n.observationsAlNat / n.observationstot) %>%
+  mutate(ratio2_norm = ratio2 / ratio2[year == 2001])
+#diviser les valeurs par celle de 2001
+
+
+# Calcul de la régression linéaire
+model <- lm(ratio2_norm ~ year, data = ratio.tablAlNat)
+summary_model <- summary(model)
+coeffs <- summary_model$coefficients
+
+# Extraction des valeurs importantes
+a <- round(coeffs[1, 1], 4)  # Intercept
+b <- round(coeffs[2, 1], 4)  # Pente
+r2 <- round(summary_model$r.squared, 4)  # R²
+p_value <- round(coeffs[2, 4], 4)  # p-value de la pente
+
+# Calcul des intervalles de confiance à 95%
+conf_int <- confint(model, level = 0.95)
+conf_low <- round(conf_int[2, 1], 4)
+conf_high <- round(conf_int[2, 2], 4)
+
+# Création du texte de la légende
+legend_text <- paste0("y = ", a, " + ", b, "x\n",
+                      "R² = ", r2, "\n",
+                      "p-value = ", p_value, "\n",
+                      "IC 95%: [", conf_low, ", ", conf_high, "]")
+
+# Graphique avec ggplot
+ggplot(ratio.tablAlNat, aes(x = year)) +
+  geom_smooth(aes(y = ratio2_norm), method = lm, fill = 'red', color = 'red') +
+  labs(x = "Years", y = "relative abundance",
+       title = "Relative abundance of the European skylark over the years at a national scale",
+       caption = "", subtitle = "Alauda arvensis") +
+  theme_classic() +
+  geom_point(aes(y = ratio2_norm), colour = 'red', size = 1) +
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5)) +
+  annotate("text", x = max(ratio.tablAlNat$year) - 0,  # Déplacement à droite
+           y = max(ratio.tablAlNat$ratio2_norm) * 0.9,  # Déplacement vers le haut
+           label = legend_text, hjust = 1, size = 3.5, color = "black")
+
+
+
+# tourterelle nationale ---------------------------------------------------
+sum.tourtNatio = tourt %>% 
+  st_drop_geometry() %>% #retire la partie spatial epour faciliter le traitement des données numériques
+  group_by(year) %>%  #groupe par année (première colone = année)
+  summarize(n.observationsToNatio = n(), n.observateurs = n_distinct(recordedBy) ) %>% #crée deux nouvelles colonnes
+  #nombre d'observations = nombre de ligne alouette par an
+  #nombre d'observateurs = nombre de noms différents ayant fait ces observations d'alouettes par an
+  mutate(ratio1 = n.observationsToNatio/n.observateurs) #nouvelle colonne qui résume le ratio des deux
+
+ratio.tabltourtNat = left_join(sum.obs,sum.tourtNatio,by="year") %>% 
+  mutate(ratio2 = n.observationsToNatio/n.observationstot) #%>% 
+#filter(year != 2014,year !=2001)
+
+
+ratio.tabltourtNat <- left_join(sum.obs, sum.tourtNatio, by = "year") %>%
+  mutate(ratio2 = n.observationsToNatio / n.observationstot) %>%
+  mutate(ratio2_norm = ratio2 / ratio2[year == 2001])
+#diviser les valeurs par celle de 2001
+
+
+# Calcul de la régression linéaire
+model <- lm(ratio2_norm ~ year, data = ratio.tabltourtNat)
+summary_model <- summary(model)
+coeffs <- summary_model$coefficients
+
+# Extraction des valeurs importantes
+a <- round(coeffs[1, 1], 4)  # Intercept
+b <- round(coeffs[2, 1], 4)  # Pente
+r2 <- round(summary_model$r.squared, 4)  # R²
+p_value <- round(coeffs[2, 4], 4)  # p-value de la pente
+
+# Calcul des intervalles de confiance à 95%
+conf_int <- confint(model, level = 0.95)
+conf_low <- round(conf_int[2, 1], 4)
+conf_high <- round(conf_int[2, 2], 4)
+
+# Création du texte de la légende
+legend_text <- paste0("y = ", a, " + ", b, "x\n",
+                      "R² = ", r2, "\n",
+                      "p-value = ", p_value, "\n",
+                      "IC 95%: [", conf_low, ", ", conf_high, "]")
+
+# Graphique avec ggplot
+ggplot(ratio.tabltourtNat, aes(x = year)) +
+  geom_smooth(aes(y = ratio2_norm), method = lm, fill = 'blue', color = 'blue') +
+  labs(x = "Years", y = "relative abundance",
+       title = "Relative abundance of the European turtle dove over the years at a national scale",
+       caption = "PIR Science Participative", subtitle = "Streptopelia turtur") +
+  theme_classic() +
+  geom_point(aes(y = ratio2_norm), colour = 'blue', size = 1) +
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5)) +
+  annotate("text", x = max(ratio.tabltourtNat$year) - 0,  # Déplacement à droite
+           y = max(ratio.tabltourtNat$ratio2_norm) * 0.9,  # Déplacement vers le haut
+           label = legend_text, hjust = 1, size = 3.5, color = "black")
+
+
+
+
+# bruantj national --------------------------------------------------------
+sum.BJNatio = bruantj %>% 
+  st_drop_geometry() %>% #retire la partie spatial epour faciliter le traitement des données numériques
+  group_by(year) %>%  #groupe par année (première colone = année)
+  summarize(n.observationsBJnatio = n(), n.observateurs = n_distinct(recordedBy) ) %>% #crée deux nouvelles colonnes
+  #nombre d'observations = nombre de ligne alouette par an
+  #nombre d'observateurs = nombre de noms différents ayant fait ces observations d'alouettes par an
+  mutate(ratio1 = n.observationsBJnatio/n.observateurs) #nouvelle colonne qui résume le ratio des deux
+
+ratio.tablBJNat = left_join(sum.obs,sum.BJNatio,by="year") %>% 
+  mutate(ratio2 = n.observationsBJnatio/n.observationstot) #%>% 
+#filter(year != 2014,year !=2001)
+
+
+ratio.tablBJNat <- left_join(sum.obs, sum.BJNatio, by = "year") %>%
+  mutate(ratio2 = n.observationsBJnatio / n.observationstot) %>%
+  mutate(ratio2_norm = ratio2 / ratio2[year == 2001])
+#diviser les valeurs par celle de 2001
+
+
+# Calcul de la régression linéaire
+model <- lm(ratio2_norm ~ year, data = ratio.tablBJNat)
+summary_model <- summary(model)
+coeffs <- summary_model$coefficients
+
+# Extraction des valeurs importantes
+a <- round(coeffs[1, 1], 4)  # Intercept
+b <- round(coeffs[2, 1], 4)  # Pente
+r2 <- round(summary_model$r.squared, 4)  # R²
+p_value <- round(coeffs[2, 4], 4)  # p-value de la pente
+
+# Calcul des intervalles de confiance à 95%
+conf_int <- confint(model, level = 0.95)
+conf_low <- round(conf_int[2, 1], 4)
+conf_high <- round(conf_int[2, 2], 4)
+
+# Création du texte de la légende
+legend_text <- paste0("y = ", a, " + ", b, "x\n",
+                      "R² = ", r2, "\n",
+                      "p-value = ", p_value, "\n",
+                      "IC 95%: [", conf_low, ", ", conf_high, "]")
+
+# Graphique avec ggplot
+ggplot(ratio.tablBJNat, aes(x = year)) +
+  geom_smooth(aes(y = ratio2_norm), method = lm, fill = 'orange', color = 'orange') +
+  labs(x = "Years", y = "relative abundance",
+       title = "Relative abundance of the Yellowhammer dove over the years at a national scale",
+       caption = "", subtitle = "Emberiza citrinella") +
+  theme_classic() +
+  geom_point(aes(y = ratio2_norm), colour = 'orange', size = 1) +
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5)) +
+  annotate("text", x = max(ratio.tablBJNat$year) - 0,  # Déplacement à droite
+           y = max(ratio.tablBJNat$ratio2_norm) * 0.9,  # Déplacement vers le haut
+           label = legend_text, hjust = 1, size = 3.5, color = "black")
+
+
+
+
+# charbo natio ------------------------------------------------------------
+sum.charboNatio = charbo %>% 
+  st_drop_geometry() %>% #retire la partie spatial epour faciliter le traitement des données numériques
+  group_by(year) %>%  #groupe par année (première colone = année)
+  summarize(n.observationscharbonatio = n(), n.observateurs = n_distinct(recordedBy) ) %>% #crée deux nouvelles colonnes
+  #nombre d'observations = nombre de ligne alouette par an
+  #nombre d'observateurs = nombre de noms différents ayant fait ces observations d'alouettes par an
+  mutate(ratio1 = n.observationscharbonatio/n.observateurs) #nouvelle colonne qui résume le ratio des deux
+
+ratio.tablcharboNat = left_join(sum.obs,sum.charboNatio,by="year") %>% 
+  mutate(ratio2 = n.observationscharbonatio/n.observationstot) #%>% 
+#filter(year != 2014,year !=2001)
+
+
+ratio.tablcharboNat <- left_join(sum.obs, sum.charboNatio, by = "year") %>%
+  mutate(ratio2 = n.observationscharbonatio / n.observationstot) %>%
+  mutate(ratio2_norm = ratio2 / ratio2[year == 2001])
+#diviser les valeurs par celle de 2001
+
+
+# Calcul de la régression linéaire
+model <- lm(ratio2_norm ~ year, data = ratio.tablcharboNat)
+summary_model <- summary(model)
+coeffs <- summary_model$coefficients
+
+# Extraction des valeurs importantes
+a <- round(coeffs[1, 1], 4)  # Intercept
+b <- round(coeffs[2, 1], 4)  # Pente
+r2 <- round(summary_model$r.squared, 4)  # R²
+p_value <- round(coeffs[2, 4], 4)  # p-value de la pente
+
+# Calcul des intervalles de confiance à 95%
+conf_int <- confint(model, level = 0.95)
+conf_low <- round(conf_int[2, 1], 4)
+conf_high <- round(conf_int[2, 2], 4)
+
+# Création du texte de la légende
+legend_text <- paste0("y = ", a, " + ", b, "x\n",
+                      "R² = ", r2, "\n",
+                      "p-value = ", p_value, "\n",
+                      "IC 95%: [", conf_low, ", ", conf_high, "]")
+
+# Graphique avec ggplot
+ggplot(ratio.tablcharboNat, aes(x = year)) +
+  geom_smooth(aes(y = ratio2_norm), method = lm, fill = 'purple', color = 'purple') +
+  labs(x = "Years", y = "relative abundance",
+       title = "Relative abundance of the Great tit over the years at a national scale",
+       caption = "", subtitle = "Parus major") +
+  theme_classic() +
+  geom_point(aes(y = ratio2_norm), colour = 'purple', size = 1) +
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5)) +
+  annotate("text", x = max(ratio.tablcharboNat$year) - 0,  # Déplacement à droite
+           y = max(ratio.tablcharboNat$ratio2_norm) * 0.9,  # Déplacement vers le haut
+           label = legend_text, hjust = 1, size = 3.5, color = "black")
+
+
+
+# linoote natio -----------------------------------------------------------
+sum.linotteNatio = linotte %>% 
+  st_drop_geometry() %>% #retire la partie spatial epour faciliter le traitement des données numériques
+  group_by(year) %>%  #groupe par année (première colone = année)
+  summarize(n.observationslinottenatio = n(), n.observateurs = n_distinct(recordedBy) ) %>% #crée deux nouvelles colonnes
+  #nombre d'observations = nombre de ligne alouette par an
+  #nombre d'observateurs = nombre de noms différents ayant fait ces observations d'alouettes par an
+  mutate(ratio1 = n.observationslinottenatio/n.observateurs) #nouvelle colonne qui résume le ratio des deux
+
+ratio.tabllinotteNat = left_join(sum.obs,sum.linotteNatio,by="year") %>% 
+  mutate(ratio2 = n.observationslinottenatio/n.observationstot) #%>% 
+#filter(year != 2014,year !=2001)
+
+
+ratio.tabllinotteNat <- left_join(sum.obs, sum.linotteNatio, by = "year") %>%
+  mutate(ratio2 = n.observationslinottenatio / n.observationstot) %>%
+  mutate(ratio2_norm = ratio2 / ratio2[year == 2001])
+#diviser les valeurs par celle de 2001
+
+
+# Calcul de la régression linéaire
+model <- lm(ratio2_norm ~ year, data = ratio.tabllinotteNat)
+summary_model <- summary(model)
+coeffs <- summary_model$coefficients
+
+# Extraction des valeurs importantes
+a <- round(coeffs[1, 1], 4)  # Intercept
+b <- round(coeffs[2, 1], 4)  # Pente
+r2 <- round(summary_model$r.squared, 4)  # R²
+p_value <- round(coeffs[2, 4], 4)  # p-value de la pente
+
+# Calcul des intervalles de confiance à 95%
+conf_int <- confint(model, level = 0.95)
+conf_low <- round(conf_int[2, 1], 4)
+conf_high <- round(conf_int[2, 2], 4)
+
+# Création du texte de la légende
+legend_text <- paste0("y = ", a, " + ", b, "x\n",
+                      "R² = ", r2, "\n",
+                      "p-value = ", p_value, "\n",
+                      "IC 95%: [", conf_low, ", ", conf_high, "]")
+
+# Graphique avec ggplot
+ggplot(ratio.tabllinotteNat, aes(x = year)) +
+  geom_smooth(aes(y = ratio2_norm), method = lm, fill = 'green', color = 'green') +
+  labs(x = "Years", y = "relative abundance",
+       title = "Relative abundance of the Common linnet over the years at a national scale",
+       caption = "", subtitle = "Linaria cannabina") +
+  theme_classic() +
+  geom_point(aes(y = ratio2_norm), colour = 'green', size = 1) +
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5)) +
+  annotate("text", x = max(ratio.tabllinotteNat$year) - 0,  # Déplacement à droite
+           y = max(ratio.tabllinotteNat$ratio2_norm) * 0.9,  # Déplacement vers le haut
+           label = legend_text, hjust = 1, size = 3.5, color = "black")
+
+
+
+
+# fauvette natio ----------------------------------------------------------
+sum.FaNatio = fauvette %>% 
+  st_drop_geometry() %>% #retire la partie spatial epour faciliter le traitement des données numériques
+  group_by(year) %>%  #groupe par année (première colone = année)
+  summarize(n.observationsFanatio = n(), n.observateurs = n_distinct(recordedBy) ) %>% #crée deux nouvelles colonnes
+  #nombre d'observations = nombre de ligne alouette par an
+  #nombre d'observateurs = nombre de noms différents ayant fait ces observations d'alouettes par an
+  mutate(ratio1 = n.observationsFanatio/n.observateurs) #nouvelle colonne qui résume le ratio des deux
+
+ratio.tablFaNat = left_join(sum.obs,sum.FaNatio,by="year") %>% 
+  mutate(ratio2 = n.observationsFanatio/n.observationstot) #%>% 
+#filter(year != 2014,year !=2001)
+
+
+ratio.tablFaNat <- left_join(sum.obs, sum.FaNatio, by = "year") %>%
+  mutate(ratio2 = n.observationsFanatio / n.observationstot) %>%
+  mutate(ratio2_norm = ratio2 / ratio2[year == 2001])
+#diviser les valeurs par celle de 2001
+
+
+# Calcul de la régression linéaire
+model <- lm(ratio2_norm ~ year, data = ratio.tablFaNat)
+summary_model <- summary(model)
+coeffs <- summary_model$coefficients
+
+# Extraction des valeurs importantes
+a <- round(coeffs[1, 1], 4)  # Intercept
+b <- round(coeffs[2, 1], 4)  # Pente
+r2 <- round(summary_model$r.squared, 4)  # R²
+p_value <- round(coeffs[2, 4], 4)  # p-value de la pente
+
+# Calcul des intervalles de confiance à 95%
+conf_int <- confint(model, level = 0.95)
+conf_low <- round(conf_int[2, 1], 4)
+conf_high <- round(conf_int[2, 2], 4)
+
+# Création du texte de la légende
+legend_text <- paste0("y = ", a, " + ", b, "x\n",
+                      "R² = ", r2, "\n",
+                      "p-value = ", p_value, "\n",
+                      "IC 95%: [", conf_low, ", ", conf_high, "]")
+
+# Graphique avec ggplot
+ggplot(ratio.tablFaNat, aes(x = year)) +
+  geom_smooth(aes(y = ratio2_norm), method = lm, fill = 'brown', color = 'brown') +
+  labs(x = "Years", y = "relative abundance",
+       title = "Relative abundance of the Common whitethroat over the years at a national scale",
+       caption = "", subtitle = "Sylvia communis") +
+  theme_classic() +
+  geom_point(aes(y = ratio2_norm), colour = 'brown', size = 1) +
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5)) +
+  annotate("text", x = max(ratio.tablFaNat$year) - 0,  # Déplacement à droite
+           y = max(ratio.tablFaNat$ratio2_norm) * 0.9,  # Déplacement vers le haut
+           label = legend_text, hjust = 1, size = 3.5, color = "black")
+
+
+
+
+# merle nation ------------------------------------------------------------
+sum.merleNatio = merle %>% 
+  st_drop_geometry() %>% #retire la partie spatial epour faciliter le traitement des données numériques
+  group_by(year) %>%  #groupe par année (première colone = année)
+  summarize(n.observationsmerlenatio = n(), n.observateurs = n_distinct(recordedBy) ) %>% #crée deux nouvelles colonnes
+  #nombre d'observations = nombre de ligne alouette par an
+  #nombre d'observateurs = nombre de noms différents ayant fait ces observations d'alouettes par an
+  mutate(ratio1 = n.observationsmerlenatio/n.observateurs) #nouvelle colonne qui résume le ratio des deux
+
+ratio.tablmerleNat = left_join(sum.obs,sum.merleNatio,by="year") %>% 
+  mutate(ratio2 = n.observationsmerlenatio/n.observationstot) #%>% 
+#filter(year != 2014,year !=2001)
+
+
+ratio.tablmerleNat <- left_join(sum.obs, sum.merleNatio, by = "year") %>%
+  mutate(ratio2 = n.observationsmerlenatio / n.observationstot) %>%
+  mutate(ratio2_norm = ratio2 / ratio2[year == 2001])
+#diviser les valeurs par celle de 2001
+
+
+# Calcul de la régression linéaire
+model <- lm(ratio2_norm ~ year, data = ratio.tablmerleNat)
+summary_model <- summary(model)
+coeffs <- summary_model$coefficients
+
+# Extraction des valeurs importantes
+a <- round(coeffs[1, 1], 4)  # Intercept
+b <- round(coeffs[2, 1], 4)  # Pente
+r2 <- round(summary_model$r.squared, 4)  # R²
+p_value <- round(coeffs[2, 4], 4)  # p-value de la pente
+
+# Calcul des intervalles de confiance à 95%
+conf_int <- confint(model, level = 0.95)
+conf_low <- round(conf_int[2, 1], 4)
+conf_high <- round(conf_int[2, 2], 4)
+
+# Création du texte de la légende
+legend_text <- paste0("y = ", a, " + ", b, "x\n",
+                      "R² = ", r2, "\n",
+                      "p-value = ", p_value, "\n",
+                      "IC 95%: [", conf_low, ", ", conf_high, "]")
+
+# Graphique avec ggplot
+ggplot(ratio.tablmerleNat, aes(x = year)) +
+  geom_smooth(aes(y = ratio2_norm), method = lm, fill = 'coral', color = 'coral') +
+  labs(x = "Years", y = "relative abundance",
+       title = "Relative abundance of the Common blackbird over the years at a national scale",
+       caption = "", subtitle = "Turdus merula") +
+  theme_classic() +
+  geom_point(aes(y = ratio2_norm), colour = 'coral', size = 1) +
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5)) +
+  annotate("text", x = max(ratio.tablmerleNat$year) - 0,  # Déplacement à droite
+           y = max(ratio.tablmerleNat$ratio2_norm) * 0.9,  # Déplacement vers le haut
+           label = legend_text, hjust = 1, size = 3.5, color = "black")
+
+
