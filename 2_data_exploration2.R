@@ -66,7 +66,7 @@ ggplot(sum.bruantj) +
 
 #evolution du nombre d'obervateurs par an en bretagne----------------------
 
-sum.obs = data.bret %>% 
+sum.observateurs = data.bret %>% 
   st_drop_geometry() %>% 
   group_by(year) %>% 
   summarize( n.observateurs = n_distinct(recordedBy) ) 

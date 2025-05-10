@@ -260,6 +260,37 @@ write.csv2(linotte.bret, "data/linotte.bret.csv")
 
 saveRDS(fauvette.bret, "data/fauvette.bret.RDS")
 write.csv2(fauvette.bret, "data/fauvette.bret.csv")
+write.csv2(charbo.bret, "data/charbo.bret.csv")
+write.csv2(merle.bret, "data/merle.bret.csv")
+write.csv2(tourt.bret, "data/tourt.bret.csv")
+
+write.csv2(fauvette, "data/fauvette.csv")
+write.csv2(alouette, "data/alouette.csv")
+write.csv2(merle, "data/merle.csv")
+write.csv2(linotte, "data/linotte.csv")
+write.csv2(tourt, "data/tourt.csv")
+write.csv2(charbo, "data/charbo.csv")
+write.csv2(bruantj, "data/bruantj.csv")
+
+write.csv2(ratio.tablLi, "data/ratio.tablLi.csv")
+write.csv2(ratio.tabllinotteNat, "data/ratio.tabllinotteNat.csv")
+write.csv2(ratio.merle, "data/ratio.merle.csv")
+write.csv2(ratio.tablmerleNat, "data/ratio.tablmerleNat.csv")
+write.csv2(ratio.alouettenbobse, "data/ratio.alouettenbobse.csv")
+write.csv2(ratio.tablAlNat, "data/ratio.tablAlNat.csv")
+write.csv2(ratio.BJobsparotot, "data/ratio.BJobsparotot.csv")
+write.csv2(ratio.tablBJNat, "data/ratio.tablBJNat.csv")
+write.csv2(ratio.tablFa, "data/ratio.tablFa.csv")
+write.csv2(ratio.tablFaNat, "data/ratio.tablFaNat.csv")
+write.csv2(ratio.tablCh, "data/ratio.tablCh.csv")
+write.csv2(ratio.tablcharboNat, "data/ratio.tablcharboNat.csv")
+write.csv2(ratio.tablCh, "data/ratio.tablCh.csv")
+write.csv2(ratio.tabltourtNat, "data/ratio.tabltourtNat.csv")
+
+write.csv2(sum.obs, "data/sum.obs.csv")
+write.csv2(sum.observateurs, "data/sum.observateurs.csv")
+write.csv2(sum.bret, "data/sum.bret.csv")
+
 #linotte et fauvette
 
 # Pour le fun : créer une carte interactive -------------------------------
