@@ -1497,3 +1497,28 @@ ggplot(ratio.tablmerleNat, aes(x = year)) +
            label = legend_text, hjust = 1, size = 3.5, color = "black")
 
 
+
+
+# resultats IC ------------------------------------------------------------
+
+
+# Prédictions avec la pente centrale
+y2001 <- a + b * 2001
+y2021 <- a + b * 2021
+perc_decline <- (y2001 - y2021) / y2001 * 100
+
+# Intervalle de confiance (min et max)
+b_min <- conf_low
+b_max <- conf_high
+
+y2001_min <- a + b_min * 2001
+y2021_min <- a + b_min * 2021
+decline_min <- (y2001_min - y2021_min) / y2001_min * 100
+
+y2001_max <- a + b_max * 2001
+y2021_max <- a + b_max * 2021
+decline_max <- (y2001_max - y2021_max) / y2001_max * 100
+
+# Résumé
+cat(sprintf("Baisse centrale : %.2f%%\n", perc_decline))
+cat(sprintf("IC 95%% : [%.2f%%, %.2f%%]\n", decline_min, decline_max))
