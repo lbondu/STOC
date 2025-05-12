@@ -1086,7 +1086,27 @@ sum.obsNat = mydat %>%
   st_drop_geometry() %>% 
   group_by(year) %>% 
   summarize( n.observationstotnat = n_distinct(occurrenceID) ) 
+sum.obsNat = read.csv2("datarecap/datarecap/sum.obsNat.csv")
 
+ratio.tablLi=read.csv2("datarecap/datarecap/ratio.tablLi.csv")
+ratio.tabllinotteNat=read.csv2( "datarecap/datarecap/ratio.tabllinotteNat.csv")
+ratio.merle=read.csv2( "datarecap/datarecap/ratio.merle.csv")
+ratio.tablmerleNat=read.csv2( "datarecap/datarecap/ratio.tablmerleNat.csv")
+ratio.alouettenbobse=read.csv2( "datarecap/datarecap/ratio.alouettenbobse.csv")
+ratio.tablAlNat=read.csv2( "datarecap/datarecap/ratio.tablAlNat.csv")
+ratio.BJobsparotot=read.csv2( "datarecap/datarecap/ratio.BJobsparotot.csv")
+ratio.tablBJNat=read.csv2( "datarecap/datarecap/ratio.tablBJNat.csv")
+ratio.tablFa=read.csv2( "datarecap/datarecap/ratio.tablFa.csv")
+ratio.tablFaNat=read.csv2( "datarecap/datarecap/ratio.tablFaNat.csv")
+ratio.tablCh=read.csv2("datarecap/datarecap/ratio.tablCh.csv")
+ratio.tablcharboNat=read.csv2( "datarecap/datarecap/ratio.tablcharboNat.csv")
+ratio.tablTo=read.csv2( "datarecap/datarecap/ratio.tablTo.csv")
+ratio.tabltourtNat=read.csv2( "datarecap/datarecap/ratio.tabltourtNat.csv")
+
+sum.obs=read.csv2( "datarecap/datarecap/sum.obs.csv")
+sum.observateurs=read.csv2( "datarecap/datarecap/sum.observateurs.csv")
+sum.bret=read.csv2( "datarecap/datarecap/sum.bret.csv")
+sum.obsNat=read.csv2( "datarecap/datarecap/sum.obsNat.csv")
 
 # alouette nationale ------------------------------------------------------
 
@@ -1522,3 +1542,14 @@ decline_max <- (y2001_max - y2021_max) / y2001_max * 100
 # Résumé
 cat(sprintf("Baisse centrale : %.2f%%\n", perc_decline))
 cat(sprintf("IC 95%% : [%.2f%%, %.2f%%]\n", decline_min, decline_max))
+
+
+# autres methode IC -------------------------------------------------------
+pred <- predict(model, newdata = data.frame(year = c(2001, 2021)), interval = "confidence")
+taux_decl <- (pred[1, "fit"] - pred[2, "fit"]) / pred[1, "fit"] * 100
+taux_decl_low <- (pred[1, "fit"] - pred[2, "upr"]) / pred[1, "fit"] * 100
+taux_decl_high <- (pred[1, "fit"] - pred[2, "lwr"]) / pred[1, "fit"] * 100
+cat(sprintf("Baisse centrale : -%.2f%%\n", taux_decl))
+cat(sprintf("IC 95%% : [-%.2f%%, -%.2f%%]\n", taux_decl_low, taux_decl_high))
+
+
